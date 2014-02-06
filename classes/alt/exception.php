@@ -15,7 +15,7 @@ class Alt_Exception extends Kohana_Kohana_Exception {
                     if($e->getCode() == 404){
                         echo View::factory("alt-error/404");
                     }else{
-                        echo View::factory("alt-error/404");
+                        echo View::factory("alt-error/500");
                     }
                     
                 } catch (Exception $e) {
@@ -42,10 +42,11 @@ class Alt_Exception extends Kohana_Kohana_Exception {
 
 
                     // We may don' want see error messages from silly bots
-                    $is_bot = preg_match("/(heritrix|bingbot|YandexBot|Googlebot|crawler|AhrefsBot)/", $_SERVER['HTTP_USER_AGENT']);
+                    $is_bot = preg_match("/(heritrix|bingbot|msnbot|YandexBot|YandexImages|Googlebot|crawler|AhrefsBot|Mail.RU_Bot)/", $_SERVER['HTTP_USER_AGENT']);
+                    $uri_filter = preg_match(kohana::$config->load('alt-error')->get('uri_filter'), $_SERVER['REQUEST_URI']);
                     $allow_bots =kohana::$config->load('alt-error')->get('allow_bots') ;
 
-                    if ( $allow_bots OR !$is_bot){
+                    if ( !$uri_filter and ($allow_bots OR !$is_bot)){
 
                             $headers = 'MIME-Version: 1.0' . "\r\n" ."Content-type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit\r\nFrom:" . kohana::$config->load('alt-error')->get('site_title') . " <" . kohana::$config->load('alt-error')->get('From') . ">";
 
