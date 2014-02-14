@@ -9,7 +9,10 @@ class Alt_Exception extends Kohana_Kohana_Exception {
                 try {
 
                     Kohana::$log->add(Log::ERROR, parent::text($e));
-
+                    if ( ! headers_sent())
+                    {
+                        header('Content-Type: text/html; charset='.Kohana::$charset, TRUE, $e->getCode());
+                    }
                     /// Sending email notification
                     self::sendmail($e);
                     if($e->getCode() == 404){
@@ -43,7 +46,8 @@ class Alt_Exception extends Kohana_Kohana_Exception {
 
                     // We may don' want see error messages from silly bots
                     $is_bot = preg_match("/(heritrix|bingbot|msnbot|YandexBot|YandexImages|Googlebot|crawler|AhrefsBot|Mail.RU_Bot)/", $_SERVER['HTTP_USER_AGENT']);
-                    $uri_filter = preg_match(kohana::$config->load('alt-error')->get('uri_filter'), $_SERVER['REQUEST_URI']);
+                    $uri_filter = (kohana::$config->load('alt-error')->get('uri_filter')!="") ?
+                             preg_match(kohana::$config->load('alt-error')->get('uri_filter'), $_SERVER['REQUEST_URI']) : false;
                     $allow_bots =kohana::$config->load('alt-error')->get('allow_bots') ;
 
                     if ( !$uri_filter and ($allow_bots OR !$is_bot)){
